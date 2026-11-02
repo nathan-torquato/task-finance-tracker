@@ -66,8 +66,13 @@ test.describe("Categories CRUD", () => {
     await page.getByLabel("Name").fill("Edit Me Updated");
     await page.getByRole("button", { name: "Save Changes" }).click();
 
-    await expect(page.getByRole("heading", { name: "Edit" })).toBeHidden();
-    await expect(page.getByText("Edit Me Updated")).toBeVisible();
+    // Wait for the dialog itself: its title flips from "Edit" as soon as the
+    // edit state is cleared, while the dialog (whose Parent Category options
+    // also list the renamed category) can still be mounted.
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await expect(
+      page.getByTestId("category-row").filter({ hasText: "Edit Me Updated" }),
+    ).toBeVisible();
   });
 
   test("changes a category's parent", async ({ page }) => {
@@ -86,7 +91,10 @@ test.describe("Categories CRUD", () => {
     await page.getByLabel("Parent Category").selectOption("Target Parent");
     await page.getByRole("button", { name: "Save Changes" }).click();
 
-    await expect(page.getByText("Move Me")).toBeVisible();
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await expect(
+      page.getByTestId("category-row").filter({ hasText: "Move Me" }),
+    ).toBeVisible();
   });
 
   test("deletes a category with no children", async ({ page }) => {
