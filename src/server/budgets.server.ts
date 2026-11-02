@@ -281,8 +281,17 @@ export async function checkBudgetAlertsForTransaction(
       .returning({ id: schema.budget_alerts.id });
     if (claimed.length === 0) continue; // already alerted this month
 
+    // The claim is kept even without an email: "user went over budget" is a
+    // domain event worth recording on its own.
     log.info({ userId, budgetId: budget.id, month }, "budget exceeded");
-    if (!user?.email) continue;
+    if (!user?.email) {
+      // Legacy accounts may have no email — never attempt a send to nowhere.
+      log.warn(
+        { userId, budgetId: budget.id, month },
+        "over-budget email skipped: user has no email",
+      );
+      continue;
+    }
 
     alerted.push(budget.id);
     try {
