@@ -102,6 +102,22 @@ export async function collectUserExport(userId: string) {
     .select()
     .from(schema.ai_usage)
     .where(eq(schema.ai_usage.user_id, userId));
+  const budgets = await db
+    .select()
+    .from(schema.budgets)
+    .where(eq(schema.budgets.user_id, userId));
+  const budgetAlerts = await db
+    .select()
+    .from(schema.budget_alerts)
+    .where(
+      inArray(
+        schema.budget_alerts.budget_id,
+        db
+          .select({ id: schema.budgets.id })
+          .from(schema.budgets)
+          .where(eq(schema.budgets.user_id, userId)),
+      ),
+    );
   const [subscription] = await db
     .select({
       plan: schema.subscriptions.plan,
@@ -122,6 +138,8 @@ export async function collectUserExport(userId: string) {
     receipts,
     receiptItems,
     aiUsage,
+    budgets,
+    budgetAlerts,
     subscription: subscription ?? null,
   };
 }
@@ -157,6 +175,12 @@ export async function buildExportZip(userId: string): Promise<Uint8Array> {
           ),
         })),
         aiUsage: data.aiUsage,
+        budgets: data.budgets.map((budget) => ({
+          ...budget,
+          alerts: data.budgetAlerts.filter(
+            (alert) => alert.budget_id === budget.id,
+          ),
+        })),
         subscription: data.subscription,
       },
       null,
@@ -224,6 +248,18 @@ export async function buildExportZip(userId: string): Promise<Uint8Array> {
         data.categories.find((c) => c.id === r.category_id)?.name,
         r.priority,
         r.source,
+      ]),
+    ),
+  );
+  files["budgets.csv"] = strToU8(
+    toCsv(
+      ["id", "category", "monthly_limit", "limit_minor", "created_at"],
+      data.budgets.map((b) => [
+        b.id,
+        data.categories.find((c) => c.id === b.category_id)?.name,
+        formatMinor(b.limit_minor),
+        b.limit_minor,
+        b.created_at?.toISOString(),
       ]),
     ),
   );
@@ -325,6 +361,17 @@ export async function hardDeleteUser(userId: string): Promise<void> {
       .delete(schema.categorization_rules)
       .where(eq(schema.categorization_rules.user_id, userId));
     await tx.delete(schema.ai_usage).where(eq(schema.ai_usage.user_id, userId));
+    // Budgets reference categories — delete them (and their alerts) first.
+    await tx.delete(schema.budget_alerts).where(
+      inArray(
+        schema.budget_alerts.budget_id,
+        tx
+          .select({ id: schema.budgets.id })
+          .from(schema.budgets)
+          .where(eq(schema.budgets.user_id, userId)),
+      ),
+    );
+    await tx.delete(schema.budgets).where(eq(schema.budgets.user_id, userId));
     await tx
       .delete(schema.subscriptions)
       .where(eq(schema.subscriptions.user_id, userId));

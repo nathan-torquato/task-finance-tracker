@@ -39,6 +39,7 @@ import { Route as AuthedImportRouteImport } from './routes/_authed/import'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedCategorizationRouteImport } from './routes/_authed/categorization'
 import { Route as AuthedCategoriesRouteImport } from './routes/_authed/categories'
+import { Route as AuthedBudgetsRouteImport } from './routes/_authed/budgets'
 import { Route as AuthedBillingRouteImport } from './routes/_authed/billing'
 import { Route as AuthedAccountsRouteImport } from './routes/_authed/accounts'
 import { Route as AuthedReceiptsScanRouteImport } from './routes/_authed/receipts/scan'
@@ -193,6 +194,11 @@ const AuthedCategoriesRoute = AuthedCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedBudgetsRoute = AuthedBudgetsRouteImport.update({
+  id: '/budgets',
+  path: '/budgets',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedBillingRoute = AuthedBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
@@ -237,6 +243,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof VerifyEmailRoute
   '/accounts': typeof AuthedAccountsRoute
   '/billing': typeof AuthedBillingRoute
+  '/budgets': typeof AuthedBudgetsRoute
   '/categories': typeof AuthedCategoriesRoute
   '/categorization': typeof AuthedCategorizationRoute
   '/dashboard': typeof AuthedDashboardRoute
@@ -272,6 +279,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof VerifyEmailRoute
   '/accounts': typeof AuthedAccountsRoute
   '/billing': typeof AuthedBillingRoute
+  '/budgets': typeof AuthedBudgetsRoute
   '/categories': typeof AuthedCategoriesRoute
   '/categorization': typeof AuthedCategorizationRoute
   '/dashboard': typeof AuthedDashboardRoute
@@ -309,6 +317,7 @@ export interface FileRoutesById {
   '/verify-email': typeof VerifyEmailRoute
   '/_authed/accounts': typeof AuthedAccountsRoute
   '/_authed/billing': typeof AuthedBillingRoute
+  '/_authed/budgets': typeof AuthedBudgetsRoute
   '/_authed/categories': typeof AuthedCategoriesRoute
   '/_authed/categorization': typeof AuthedCategorizationRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/accounts'
     | '/billing'
+    | '/budgets'
     | '/categories'
     | '/categorization'
     | '/dashboard'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/accounts'
     | '/billing'
+    | '/budgets'
     | '/categories'
     | '/categorization'
     | '/dashboard'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/_authed/accounts'
     | '/_authed/billing'
+    | '/_authed/budgets'
     | '/_authed/categories'
     | '/_authed/categorization'
     | '/_authed/dashboard'
@@ -668,6 +680,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedCategoriesRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/budgets': {
+      id: '/_authed/budgets'
+      path: '/budgets'
+      fullPath: '/budgets'
+      preLoaderRoute: typeof AuthedBudgetsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/billing': {
       id: '/_authed/billing'
       path: '/billing'
@@ -716,6 +735,7 @@ const AuthedReceiptsRouteWithChildren = AuthedReceiptsRoute._addFileChildren(
 interface AuthedRouteChildren {
   AuthedAccountsRoute: typeof AuthedAccountsRoute
   AuthedBillingRoute: typeof AuthedBillingRoute
+  AuthedBudgetsRoute: typeof AuthedBudgetsRoute
   AuthedCategoriesRoute: typeof AuthedCategoriesRoute
   AuthedCategorizationRoute: typeof AuthedCategorizationRoute
   AuthedDashboardRoute: typeof AuthedDashboardRoute
@@ -728,6 +748,7 @@ interface AuthedRouteChildren {
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAccountsRoute: AuthedAccountsRoute,
   AuthedBillingRoute: AuthedBillingRoute,
+  AuthedBudgetsRoute: AuthedBudgetsRoute,
   AuthedCategoriesRoute: AuthedCategoriesRoute,
   AuthedCategorizationRoute: AuthedCategorizationRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,

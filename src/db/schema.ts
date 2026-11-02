@@ -9,6 +9,7 @@ import {
   doublePrecision,
   serial,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const auth_token_type = pgEnum("auth_token_type", [
@@ -275,6 +276,51 @@ export const stripe_events = pgTable("stripe_events", {
     .notNull()
     .defaultNow(),
 });
+
+// Monthly spending limit per category. Spend is never stored: it is computed
+// on read from transactions for the requested calendar month (so budgets
+// "reset" every month with no job), rolling a parent's limit up over all of
+// its descendant categories. One budget per category.
+export const budgets = pgTable(
+  "budgets",
+  {
+    id: text("id").primaryKey(),
+    user_id: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    category_id: text("category_id")
+      .notNull()
+      .references(() => categories.id),
+    // Integer minor units (grosze/cents) — never store money as floats.
+    limit_minor: integer("limit_minor").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updated_at: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [uniqueIndex("budgets_user_category_idx").on(t.user_id, t.category_id)],
+);
+
+// One row per budget per calendar month ("YYYY-MM") in which the user went
+// over budget — the idempotency ledger for the over-budget email. Inserting
+// first (ON CONFLICT DO NOTHING) guarantees at most one email per budget per
+// month, even under concurrent writes.
+export const budget_alerts = pgTable(
+  "budget_alerts",
+  {
+    id: text("id").primaryKey(),
+    budget_id: text("budget_id")
+      .notNull()
+      .references(() => budgets.id),
+    month: text("month").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [uniqueIndex("budget_alerts_budget_month_idx").on(t.budget_id, t.month)],
+);
 
 export const todos = pgTable("todos", {
   id: serial("id").primaryKey(),
