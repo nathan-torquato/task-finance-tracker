@@ -408,4 +408,30 @@ test.describe("Transaction List Page", () => {
 
     await expect(page.getByLabel("Search")).toHaveValue("");
   });
+
+  // Transaction dates are calendar dates: the viewer's timezone must never
+  // shift them. CI runs in UTC, so pin browsers far west and far east of it
+  // to catch any local-time conversion regressions.
+  for (const timezoneId of ["Pacific/Honolulu", "Pacific/Kiritimati"]) {
+    test.describe(`in ${timezoneId}`, () => {
+      test.use({ timezoneId });
+
+      test("shows the stored calendar date unshifted", async ({ page }) => {
+        await createAccount(page, "Main");
+
+        await fillTransactionForm(page, {
+          date: "2025-03-01",
+          description: `TZ ${timezoneId}`,
+          amount: "12.00",
+          account: "Main (PLN)",
+        });
+
+        const row = page
+          .getByRole("table")
+          .getByRole("row")
+          .filter({ hasText: `TZ ${timezoneId}` });
+        await expect(row.getByText("Mar 1, 2025")).toBeVisible();
+      });
+    });
+  }
 });

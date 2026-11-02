@@ -14,6 +14,7 @@ export const OWNED_TABLES = {
   rule: schema.categorization_rules,
   receipt: schema.receipts,
   importBatch: schema.import_batches,
+  budget: schema.budgets,
 } as const;
 
 export type OwnedEntity = keyof typeof OWNED_TABLES;

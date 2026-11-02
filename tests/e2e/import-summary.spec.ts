@@ -23,6 +23,7 @@ async function importCsv(
   accountLabel: string,
 ) {
   await page.getByRole("link", { name: "Dashboard" }).click();
+  await expect(page).toHaveURL("/dashboard");
   await page.getByRole("link", { name: "Import" }).click();
 
   // Upload step — click the "Choose File" label to open the native file chooser

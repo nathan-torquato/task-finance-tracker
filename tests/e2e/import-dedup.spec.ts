@@ -21,6 +21,7 @@ async function createAccount(page: Page, name: string) {
 async function importCsv(page: Page, fileName: string, accountLabel: string) {
   // Round-trip via Dashboard so the Import component unmounts and resets between calls.
   await page.getByRole("link", { name: "Dashboard" }).click();
+  await expect(page).toHaveURL("/dashboard");
   await page.getByRole("link", { name: "Import" }).click();
 
   // Upload step — click the "Choose File" label to open the native file chooser
@@ -130,6 +131,7 @@ test.describe("CSV import duplicate detection", () => {
 
     // Start a second import; stop on the preview step and check badges.
     await page.getByRole("link", { name: "Dashboard" }).click();
+    await expect(page).toHaveURL("/dashboard");
     await page.getByRole("link", { name: "Import" }).click();
 
     // Upload step — click the "Choose File" label to open the native file chooser

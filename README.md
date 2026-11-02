@@ -7,8 +7,11 @@ embedded PGlite), TanStack Query, Tailwind/shadcn UI and Paraglide i18n.
 
 ## Getting started
 
-Requirements: Node.js 22+ and pnpm 10 (`corepack enable` will pick up the
-pinned version). Use `pnpm`, not `npm`.
+Requirements: Node.js 22 and pnpm 10 (`corepack enable` will pick up the
+pinned version). Use `pnpm`, not `npm`. The exact Node version is pinned in
+`.nvmrc` (`nvm use`) and in `devEngines.runtime`, so `pnpm install`
+downloads it and every `pnpm run` script uses it, whatever your global Node
+version is.
 
 ```bash
 pnpm install

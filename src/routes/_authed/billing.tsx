@@ -201,6 +201,16 @@ function BillingPage() {
                         limit: billing.entitlements.maxAccounts,
                       })}
                 </li>
+                <li data-testid="billing-budgets-usage">
+                  {billing.entitlements.maxBudgets === null
+                    ? m.billing_budgets_unlimited({
+                        used: billing.usage.budgetsUsed,
+                      })
+                    : m.billing_budgets_usage({
+                        used: billing.usage.budgetsUsed,
+                        limit: billing.entitlements.maxBudgets,
+                      })}
+                </li>
               </ul>
             </section>
           </>

@@ -29,6 +29,13 @@
       "when": 1783806144711,
       "tag": "0003_hesitant_clea",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793639966009,
+      "tag": "0004_monthly_category_budgets",
+      "breakpoints": true
     }
   ]
 }
